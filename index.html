@@ -1,4 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N10-009 Network+ Study Tracker</title>
 <style>
+  body{margin:0;}
   :root{
     --bg:#0a0d10;
     --panel:#11161b;
@@ -218,11 +225,29 @@
   }
   .np-reset:hover{color:var(--amber); border-color:var(--amber);}
   @media (max-width:640px){
+    #np-root{min-height:100vh; border-radius:0; border-left:none; border-right:none;}
+    .np-topbar{padding:14px 14px 12px;}
+    .np-topbar-row{flex-direction:column; align-items:flex-start; gap:8px;}
+    .np-stats{gap:12px; font-size:11px;}
     .np-body{flex-direction:column;}
-    .np-nav{width:100%; display:flex; overflow-x:auto; border-right:none; border-bottom:1px solid var(--border);}
-    .np-nav-item{min-width:130px;}
+    .np-nav{width:100%; display:flex; overflow-x:auto; border-right:none; border-bottom:1px solid var(--border); padding:8px; gap:6px; -webkit-overflow-scrolling:touch;}
+    .np-nav-item{min-width:140px; flex-shrink:0;}
+    .np-main{padding:16px 14px 24px;}
+    .np-section-head{font-size:17px;}
+    .np-subsection-title{font-size:11px;}
+    .np-video-row{padding:12px 8px; gap:10px;}
+    .np-check{width:22px; height:22px;}
+    .np-video-title{font-size:13.5px;}
+    .np-video-dur{width:38px; font-size:10px;}
+    .np-video-link{font-size:10px; padding:5px 8px;}
+    .np-footer{padding:10px 14px; flex-direction:column; gap:8px; align-items:flex-start;}
   }
-</style>
+  @media (max-width:400px){
+    .np-video-dur{display:none;}
+  }
+  </style>
+</head>
+<body>
 
 <div id="np-root">
   <div class="np-topbar">
@@ -531,4 +556,8 @@
   loadProgress();
 })();
 </script>
+</body>
+</html>
+
+
 

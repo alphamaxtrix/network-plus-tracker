@@ -1,0 +1,482 @@
+<style>
+  :root{
+    --bg:#0a0d10;
+    --panel:#11161b;
+    --panel-alt:#161d24;
+    --border:#212a32;
+    --text:#dde5ec;
+    --text-dim:#7c8a97;
+    --accent:#35e0a1;
+    --accent-dim:rgba(53,224,161,0.14);
+    --amber:#ffb454;
+    --red:#ff6b6b;
+    --red-dim:rgba(255,107,107,0.14);
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  #nq-root{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid var(--border);
+    min-height:600px;
+    display:flex;
+    flex-direction:column;
+  }
+  .nq-topbar{
+    padding:18px 22px 16px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, var(--panel-alt), var(--panel));
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .nq-title{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  .nq-title strong{color:var(--accent); font-weight:600;}
+  .nq-stats{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+    display:flex;
+    gap:16px;
+  }
+  .nq-stats b{color:var(--text); font-weight:600;}
+  .nq-main{
+    flex:1;
+    padding:26px 28px 30px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---- Home / category select ---- */
+  .nq-home-title{
+    font-size:20px;
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  .nq-home-sub{
+    font-size:13px;
+    color:var(--text-dim);
+    margin-bottom:20px;
+  }
+  .nq-cat-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:12px;
+  }
+  .nq-cat-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
+    cursor:pointer;
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .nq-cat-card:hover{border-color:var(--accent); background:var(--panel-alt);}
+  .nq-cat-name{font-size:14px; font-weight:600; margin-bottom:8px;}
+  .nq-cat-bar{height:5px; border-radius:3px; background:var(--border); overflow:hidden; margin-bottom:6px;}
+  .nq-cat-bar-fill{height:100%; background:var(--accent);}
+  .nq-cat-meta{font-family:var(--mono); font-size:10.5px; color:var(--text-dim);}
+
+  /* ---- Question view ---- */
+  .nq-qhead{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+    margin-bottom:14px;
+  }
+  .nq-progress-track{
+    height:6px;
+    border-radius:3px;
+    background:var(--panel-alt);
+    border:1px solid var(--border);
+    overflow:hidden;
+    margin-bottom:22px;
+  }
+  .nq-progress-fill{
+    height:100%;
+    background:var(--accent);
+    transition:width 0.3s ease;
+  }
+  .nq-question{
+    font-size:17px;
+    font-weight:600;
+    line-height:1.5;
+    margin-bottom:20px;
+  }
+  .nq-options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .nq-option{
+    text-align:left;
+    background:var(--panel);
+    border:1.5px solid var(--border);
+    border-radius:9px;
+    padding:13px 16px;
+    color:var(--text);
+    font-size:14px;
+    font-family:var(--sans);
+    cursor:pointer;
+    transition:border-color 0.12s, background 0.12s;
+  }
+  .nq-option:hover:not(:disabled){border-color:var(--accent); background:var(--panel-alt);}
+  .nq-option:disabled{cursor:default;}
+  .nq-option.correct{border-color:var(--accent); background:var(--accent-dim); color:var(--accent);}
+  .nq-option.incorrect{border-color:var(--red); background:var(--red-dim); color:var(--red);}
+  .nq-option.reveal{opacity:0.55;}
+  .nq-feedback{
+    margin-top:18px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-dim);
+    min-height:18px;
+  }
+  .nq-feedback.correct{color:var(--accent);}
+  .nq-feedback.incorrect{color:var(--red);}
+  .nq-actions{
+    margin-top:20px;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .nq-btn{
+    background:var(--accent);
+    color:#0a0d10;
+    border:none;
+    font-family:var(--mono);
+    font-size:12.5px;
+    font-weight:600;
+    padding:10px 18px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .nq-btn:hover{opacity:0.9;}
+  .nq-btn.ghost{
+    background:none;
+    border:1px solid var(--border);
+    color:var(--text-dim);
+  }
+  .nq-btn.ghost:hover{color:var(--accent); border-color:var(--accent);}
+
+  /* ---- Results ---- */
+  .nq-results{
+    text-align:center;
+    padding:20px 0;
+  }
+  .nq-score{
+    font-family:var(--mono);
+    font-size:44px;
+    font-weight:700;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  .nq-score-label{
+    font-size:13px;
+    color:var(--text-dim);
+    margin-bottom:24px;
+  }
+  .nq-missed{
+    text-align:left;
+    max-width:520px;
+    margin:0 auto 24px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .nq-missed-title{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--amber);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:10px;
+  }
+  .nq-missed-item{
+    font-size:13px;
+    padding:6px 0;
+    border-bottom:1px dashed var(--border);
+  }
+  .nq-missed-item:last-child{border-bottom:none;}
+  .nq-missed-item b{color:var(--accent); font-weight:600;}
+  .nq-result-actions{display:flex; gap:10px; justify-content:center;}
+
+  .nq-back{
+    background:none;
+    border:none;
+    color:var(--text-dim);
+    font-family:var(--mono);
+    font-size:11px;
+    cursor:pointer;
+    margin-bottom:14px;
+    text-align:left;
+    padding:0;
+  }
+  .nq-back:hover{color:var(--accent);}
+
+  @media (max-width:520px){
+    .nq-cat-grid{grid-template-columns:1fr;}
+    .nq-score{font-size:34px;}
+  }
+</style>
+
+<div id="nq-root">
+  <div class="nq-topbar">
+    <div class="nq-title">N10-009 <strong>NETWORK+</strong> // QUIZ</div>
+    <div class="nq-stats" id="nq-topstats"></div>
+  </div>
+  <div class="nq-main" id="nq-main"></div>
+</div>
+
+<script>
+(function(){
+  const BANK = {
+    "Ports & Protocols": [
+      {q:"Which port does DNS primarily use?", o:["21","53","67","443"], a:1},
+      {q:"Which port does SSH use by default?", o:["22","23","25","3389"], a:0},
+      {q:"Which port does HTTPS use?", o:["80","443","8080","110"], a:1},
+      {q:"Which port does SMTP use for sending mail?", o:["25","110","143","465"], a:0},
+      {q:"A DHCP server listens for client requests on which port?", o:["67","68","69","80"], a:0},
+      {q:"Which port does the SNMP agent listen on for requests?", o:["161","162","389","514"], a:0},
+      {q:"What is the default port for RDP?", o:["1433","3306","3389","5900"], a:2},
+      {q:"Which port does NTP use?", o:["53","110","123","161"], a:2},
+      {q:"What is the default port for LDAP (unencrypted)?", o:["389","443","636","3268"], a:0},
+      {q:"Which port does SMB (Windows file sharing) use?", o:["139","389","445","3389"], a:2}
+    ],
+    "Subnetting & IP Addressing": [
+      {q:"What is the default subnet mask for a Class C network?", o:["255.0.0.0","255.255.0.0","255.255.255.0","255.255.255.255"], a:2},
+      {q:"How many usable host addresses are in a /28 subnet?", o:["6","14","30","62"], a:1},
+      {q:"What subnet mask corresponds to CIDR /27?", o:["255.255.255.128","255.255.255.192","255.255.255.224","255.255.255.240"], a:2},
+      {q:"Borrowing 3 bits from a /24 network creates how many subnets?", o:["2","4","8","16"], a:2},
+      {q:"What is the network address for 192.168.10.45/26?", o:["192.168.10.0","192.168.10.32","192.168.10.64","192.168.10.45"], a:0},
+      {q:"How many usable host addresses does a /30 subnet provide?", o:["0","2","4","6"], a:1},
+      {q:"Which of these is a Class A private address range?", o:["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","169.254.0.0/16"], a:0},
+      {q:"What is the broadcast address for the 172.16.0.0/22 network?", o:["172.16.0.255","172.16.1.255","172.16.3.255","172.16.4.255"], a:2},
+      {q:"How many bits make up an IPv6 address?", o:["32","64","128","256"], a:2},
+      {q:"CIDR notation /24 is equivalent to which dotted-decimal mask?", o:["255.0.0.0","255.255.0.0","255.255.255.0","255.255.255.128"], a:2}
+    ],
+    "Devices & OSI Model": [
+      {q:"Which OSI layer is responsible for MAC addressing?", o:["Physical (1)","Data Link (2)","Network (3)","Transport (4)"], a:1},
+      {q:"Routers primarily make forwarding decisions at which OSI layer?", o:["Layer 2","Layer 3","Layer 4","Layer 7"], a:1},
+      {q:"Which device forwards frames based on MAC address tables?", o:["Hub","Switch","Repeater","Modem"], a:1},
+      {q:"TCP's reliable, connection-oriented delivery operates at which OSI layer?", o:["Session (5)","Transport (4)","Network (3)","Data Link (2)"], a:1},
+      {q:"Which OSI layer is typically associated with encryption and data formatting (e.g. SSL/TLS)?", o:["Presentation (6)","Application (7)","Session (5)","Transport (4)"], a:0},
+      {q:"A device that connects two different broadcast domains together is a:", o:["Switch","Hub","Router","Access Point"], a:2},
+      {q:"Which OSI layer is the topmost, closest to the end user application?", o:["Session (5)","Presentation (6)","Application (7)","Transport (4)"], a:2},
+      {q:"Which OSI layer deals with raw bit transmission over physical media?", o:["Physical (1)","Data Link (2)","Network (3)","Session (5)"], a:0},
+      {q:"VLAN tagging (802.1Q) primarily operates at which OSI layer?", o:["Layer 1","Layer 2","Layer 3","Layer 4"], a:1},
+      {q:"Which protocol operates at OSI Layer 3?", o:["Ethernet","IP","TCP","HTTP"], a:1}
+    ],
+    "Security & Attacks": [
+      {q:"An attack that overwhelms a switch's MAC address table, forcing it to broadcast all traffic, is called:", o:["ARP poisoning","MAC flooding","VLAN hopping","DNS poisoning"], a:1},
+      {q:"An attacker secretly intercepting and possibly altering traffic between two parties is performing a(n):", o:["On-path attack","Brute force attack","DDoS attack","Social engineering attack"], a:0},
+      {q:"Which wireless security standard is currently the strongest of these options?", o:["WEP","WPA","WPA2","WPA3"], a:3},
+      {q:"Tricking a switch port into becoming a trunk port to jump between VLANs describes:", o:["Switch spoofing","MAC flooding","ARP poisoning","Rogue DHCP"], a:0},
+      {q:"Falsifying ARP replies to redirect traffic through an attacker's device is called:", o:["DNS poisoning","ARP poisoning","VLAN hopping","MAC flooding"], a:1},
+      {q:"A fake wireless access point mimicking a legitimate SSID to lure users is called a(n):", o:["Rogue DHCP server","Evil twin","Honeypot","Captive portal"], a:1},
+      {q:"Which protocol centralizes authentication, authorization, and accounting (AAA) for network devices?", o:["RADIUS","SNMP","LDAP","NTP"], a:0},
+      {q:"Following an authorized person through a secured door without your own credentials is called:", o:["Shoulder surfing","Tailgating","Phishing","Dumpster diving"], a:1},
+      {q:"Confidentiality, Integrity, and Availability together make up the:", o:["AAA model","CIA triad","Zero Trust model","OSI model"], a:1},
+      {q:"A honeypot is primarily used to:", o:["Block all inbound traffic","Encrypt data at rest","Attract and study attacker behavior","Filter DNS requests"], a:2}
+    ],
+    "Troubleshooting & Tools": [
+      {q:"Which command-line tool shows the hop-by-hop path packets take to a destination?", o:["ping","traceroute","netstat","nslookup"], a:1},
+      {q:"Which tool is used to query DNS records directly?", o:["dig","tcpdump","netstat","arp"], a:0},
+      {q:"The ping command primarily tests:", o:["DNS resolution speed","Basic reachability via ICMP echo","Port availability","Bandwidth capacity"], a:1},
+      {q:"A tool used to verify a cable is wired correctly end-to-end is a:", o:["Tone generator","Cable certifier/tester","Protocol analyzer","Loopback plug"], a:1},
+      {q:"CRC errors on an interface are typically a sign of a problem at which layer?", o:["Physical/cabling","Application","Session","Transport"], a:0},
+      {q:"An Ethernet frame smaller than the 64-byte minimum is called a:", o:["Giant","Jumbo frame","Runt","Collision"], a:2},
+      {q:"Which tool captures and inspects live network traffic in detail?", o:["Port scanner","Protocol analyzer","Speed test site","Device discovery tool"], a:1},
+      {q:"A switch port that shuts itself down due to a security violation or detected loop enters what state?", o:["Trunk mode","Error disabled","Access mode","Forwarding"], a:1},
+      {q:"A tone generator and probe are used together to:", o:["Test wireless signal strength","Trace and identify a specific cable","Measure power draw","Certify fiber optic loss"], a:1},
+      {q:"Which command shows active network connections and listening ports on a host?", o:["netstat","tracert","dig","arp"], a:0}
+    ]
+  };
+
+  const STORAGE_KEY = 'n10009-quiz-stats';
+  let stats = {}; // { "Category Name": {attempted: n, correct: n} }
+  let view = 'home';
+  let session = null; // {cat, questions:[], idx, correctCount, missed:[], answered:false}
+
+  const mainEl = document.getElementById('nq-main');
+  const topstatsEl = document.getElementById('nq-topstats');
+
+  function loadStats(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) stats = JSON.parse(raw);
+    }catch(e){}
+  }
+  function saveStats(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); }catch(e){}
+  }
+  function catStat(cat){
+    return stats[cat] || {attempted:0, correct:0};
+  }
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function renderTopStats(){
+    let totalAttempted=0, totalCorrect=0;
+    Object.values(stats).forEach(s=>{totalAttempted+=s.attempted; totalCorrect+=s.correct;});
+    const pct = totalAttempted ? Math.round(totalCorrect/totalAttempted*100) : 0;
+    topstatsEl.innerHTML = totalAttempted
+      ? `<span><b>${totalCorrect}</b>/${totalAttempted} all-time correct</span><span><b>${pct}%</b> accuracy</span>`
+      : `<span>No attempts yet</span>`;
+  }
+
+  function renderHome(){
+    view = 'home';
+    let html = `
+      <div class="nq-home-title">Choose a category</div>
+      <div class="nq-home-sub">10 questions per round · multiple choice · tracks your accuracy per topic</div>
+      <div class="nq-cat-grid">`;
+    Object.keys(BANK).forEach(cat=>{
+      const s = catStat(cat);
+      const pct = s.attempted ? Math.round(s.correct/s.attempted*100) : 0;
+      html += `
+        <div class="nq-cat-card" data-cat="${cat}">
+          <div class="nq-cat-name">${cat}</div>
+          <div class="nq-cat-bar"><div class="nq-cat-bar-fill" style="width:${pct}%"></div></div>
+          <div class="nq-cat-meta">${s.attempted ? pct + '% accuracy · ' + s.attempted + ' answered' : 'not attempted yet'}</div>
+        </div>`;
+    });
+    html += `
+        <div class="nq-cat-card" data-cat="__mixed__">
+          <div class="nq-cat-name">Mixed Review</div>
+          <div class="nq-cat-bar"><div class="nq-cat-bar-fill" style="width:0%"></div></div>
+          <div class="nq-cat-meta">random pull from all categories</div>
+        </div>
+      </div>`;
+    mainEl.innerHTML = html;
+    mainEl.querySelectorAll('.nq-cat-card').forEach(card=>{
+      card.addEventListener('click', ()=> startQuiz(card.getAttribute('data-cat')));
+    });
+    renderTopStats();
+  }
+
+  function startQuiz(cat){
+    let pool;
+    if(cat === '__mixed__'){
+      pool = [];
+      Object.values(BANK).forEach(qs => pool.push(...qs));
+    } else {
+      pool = BANK[cat];
+    }
+    const questions = shuffle(pool).slice(0, 10);
+    session = {cat: cat === '__mixed__' ? 'Mixed Review' : cat, questions, idx:0, correctCount:0, missed:[], answered:false};
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    view = 'quiz';
+    const q = session.questions[session.idx];
+    const pct = Math.round((session.idx)/session.questions.length*100);
+    let html = `
+      <button class="nq-back" id="nq-quit">&larr; back to categories</button>
+      <div class="nq-qhead"><span>${session.cat}</span><span>Question ${session.idx+1} / ${session.questions.length}</span></div>
+      <div class="nq-progress-track"><div class="nq-progress-fill" style="width:${pct}%"></div></div>
+      <div class="nq-question">${q.q}</div>
+      <div class="nq-options">`;
+    q.o.forEach((opt, i)=>{
+      html += `<button class="nq-option" data-i="${i}">${opt}</button>`;
+    });
+    html += `</div><div class="nq-feedback" id="nq-feedback"></div><div class="nq-actions" id="nq-actions"></div>`;
+    mainEl.innerHTML = html;
+    document.getElementById('nq-quit').addEventListener('click', renderHome);
+    mainEl.querySelectorAll('.nq-option').forEach(btn=>{
+      btn.addEventListener('click', ()=> answer(parseInt(btn.getAttribute('data-i'))));
+    });
+  }
+
+  function answer(i){
+    const q = session.questions[session.idx];
+    const buttons = mainEl.querySelectorAll('.nq-option');
+    buttons.forEach(b=> b.disabled = true);
+    const correct = i === q.a;
+    buttons[i].classList.add(correct ? 'correct' : 'incorrect');
+    if(!correct) buttons[q.a].classList.add('correct');
+    buttons.forEach((b, idx)=>{ if(idx!==i && idx!==q.a) b.classList.add('reveal'); });
+
+    const fb = document.getElementById('nq-feedback');
+    fb.textContent = correct ? 'Correct.' : `Incorrect — correct answer: ${q.o[q.a]}`;
+    fb.className = 'nq-feedback ' + (correct ? 'correct' : 'incorrect');
+
+    if(correct) session.correctCount++;
+    else session.missed.push({q: q.q, correct: q.o[q.a]});
+
+    const catKey = session.cat === 'Mixed Review' ? null : session.cat;
+    if(catKey){
+      if(!stats[catKey]) stats[catKey] = {attempted:0, correct:0};
+      stats[catKey].attempted++;
+      if(correct) stats[catKey].correct++;
+      saveStats();
+    }
+
+    const actions = document.getElementById('nq-actions');
+    const isLast = session.idx === session.questions.length - 1;
+    const btn = document.createElement('button');
+    btn.className = 'nq-btn';
+    btn.textContent = isLast ? 'See results' : 'Next question';
+    btn.addEventListener('click', ()=>{
+      if(isLast){ renderResults(); }
+      else { session.idx++; renderQuestion(); }
+    });
+    actions.appendChild(btn);
+  }
+
+  function renderResults(){
+    view = 'results';
+    const total = session.questions.length;
+    const pct = Math.round(session.correctCount/total*100);
+    let html = `
+      <div class="nq-results">
+        <div class="nq-score">${session.correctCount}/${total}</div>
+        <div class="nq-score-label">${pct}% correct · ${session.cat}</div>`;
+    if(session.missed.length){
+      html += `<div class="nq-missed"><div class="nq-missed-title">Review these</div>`;
+      session.missed.forEach(m=>{
+        html += `<div class="nq-missed-item">${m.q}<br><b>${m.correct}</b></div>`;
+      });
+      html += `</div>`;
+    }
+    html += `
+        <div class="nq-result-actions">
+          <button class="nq-btn ghost" id="nq-home-btn">Categories</button>
+          <button class="nq-btn" id="nq-retry-btn">Try again</button>
+        </div>
+      </div>`;
+    mainEl.innerHTML = html;
+    document.getElementById('nq-home-btn').addEventListener('click', renderHome);
+    document.getElementById('nq-retry-btn').addEventListener('click', ()=> {
+      const cat = session.cat === 'Mixed Review' ? '__mixed__' : session.cat;
+      startQuiz(cat);
+    });
+    renderTopStats();
+  }
+
+  loadStats();
+  renderHome();
+})();
+</script>

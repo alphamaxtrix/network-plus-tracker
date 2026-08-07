@@ -1,0 +1,532 @@
+<style>
+  :root{
+    --bg:#0a0d10;
+    --panel:#11161b;
+    --panel-alt:#161d24;
+    --border:#212a32;
+    --text:#dde5ec;
+    --text-dim:#7c8a97;
+    --accent:#35e0a1;
+    --accent-dim:rgba(53,224,161,0.14);
+    --amber:#ffb454;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  #np-root{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid var(--border);
+    min-height:640px;
+    display:flex;
+    flex-direction:column;
+  }
+  .np-topbar{
+    padding:18px 22px 16px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, var(--panel-alt), var(--panel));
+  }
+  .np-topbar-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .np-title{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  .np-title strong{color:var(--accent); font-weight:600;}
+  .np-stats{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+    display:flex;
+    gap:16px;
+  }
+  .np-stats b{color:var(--text); font-weight:600;}
+  .np-linkbar{
+    margin-top:12px;
+    height:8px;
+    border-radius:4px;
+    background:var(--panel-alt);
+    border:1px solid var(--border);
+    overflow:hidden;
+    position:relative;
+  }
+  .np-linkbar-fill{
+    height:100%;
+    background:linear-gradient(90deg, #1f9d75, var(--accent));
+    width:0%;
+    transition:width 0.4s ease;
+  }
+  .np-body{
+    display:flex;
+    flex:1;
+    min-height:0;
+  }
+  .np-nav{
+    width:220px;
+    flex-shrink:0;
+    border-right:1px solid var(--border);
+    background:var(--panel);
+    padding:10px;
+    overflow-y:auto;
+  }
+  .np-nav-item{
+    padding:10px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-bottom:4px;
+    transition:background 0.15s;
+  }
+  .np-nav-item:hover{background:var(--panel-alt);}
+  .np-nav-item.active{background:var(--accent-dim); box-shadow: inset 2px 0 0 var(--accent);}
+  .np-nav-label{
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+    margin-bottom:5px;
+  }
+  .np-nav-item.active .np-nav-label{color:var(--accent);}
+  .np-nav-bar{
+    height:4px;
+    border-radius:2px;
+    background:var(--border);
+    overflow:hidden;
+  }
+  .np-nav-bar-fill{
+    height:100%;
+    background:var(--accent);
+  }
+  .np-nav-count{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--text-dim);
+    margin-top:5px;
+  }
+  .np-main{
+    flex:1;
+    overflow-y:auto;
+    padding:20px 24px 28px;
+  }
+  .np-section-head{
+    font-size:19px;
+    font-weight:700;
+    margin:0 0 2px;
+  }
+  .np-section-sub{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+    margin-bottom:18px;
+  }
+  .np-subsection{
+    margin-bottom:22px;
+  }
+  .np-subsection-title{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--amber);
+    letter-spacing:0.04em;
+    margin-bottom:8px;
+    padding-bottom:6px;
+    border-bottom:1px dashed var(--border);
+  }
+  .np-video-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:9px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:background 0.12s;
+  }
+  .np-video-row:hover{background:var(--panel-alt);}
+  .np-check{
+    width:18px;
+    height:18px;
+    flex-shrink:0;
+    border-radius:5px;
+    border:1.5px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:all 0.15s;
+  }
+  .np-check.done{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  .np-check.done svg{display:block;}
+  .np-check svg{display:none; width:11px; height:11px;}
+  .np-video-title{
+    flex:1;
+    font-size:14px;
+    color:var(--text);
+  }
+  .np-video-row.done .np-video-title{
+    color:var(--text-dim);
+    text-decoration:line-through;
+    text-decoration-color:var(--border);
+  }
+  .np-video-dur{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+    width:44px;
+    text-align:right;
+    flex-shrink:0;
+  }
+  .np-video-link{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+    text-decoration:none;
+    padding:3px 7px;
+    border:1px solid var(--border);
+    border-radius:5px;
+    flex-shrink:0;
+  }
+  .np-video-link:hover{color:var(--accent); border-color:var(--accent);}
+  .np-footer{
+    padding:10px 22px;
+    border-top:1px solid var(--border);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .np-reset{
+    background:none;
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    font-family:var(--mono);
+    font-size:11px;
+    padding:5px 10px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .np-reset:hover{color:var(--amber); border-color:var(--amber);}
+  @media (max-width:640px){
+    .np-body{flex-direction:column;}
+    .np-nav{width:100%; display:flex; overflow-x:auto; border-right:none; border-bottom:1px solid var(--border);}
+    .np-nav-item{min-width:130px;}
+  }
+</style>
+
+<div id="np-root">
+  <div class="np-topbar">
+    <div class="np-topbar-row">
+      <div class="np-title">N10-009 <strong>NETWORK+</strong> // STUDY TRACKER</div>
+      <div class="np-stats" id="np-topstats"></div>
+    </div>
+    <div class="np-linkbar"><div class="np-linkbar-fill" id="np-linkfill"></div></div>
+  </div>
+  <div class="np-body">
+    <div class="np-nav" id="np-nav"></div>
+    <div class="np-main" id="np-main"></div>
+  </div>
+  <div class="np-footer">
+    <span id="np-footstat">Loading progress…</span>
+    <button class="np-reset" id="np-reset">Reset progress</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const DATA = [
+    {id:0, title:"The N10-009 Exam", subs:[
+      {t:"0.1 – Introduction", v:[
+        {t:"How to Pass Your N10-009 Network+ Exam", d:"7:30", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/how-to-pass-your-n10-009-network-plus-exam/"}
+      ]}
+    ]},
+    {id:1, title:"Networking Concepts", subs:[
+      {t:"1.1 – The OSI Model", v:[
+        {t:"Understanding the OSI Model", d:"13:51", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/understanding-the-osi-model-n10-009/"}
+      ]},
+      {t:"1.2 – Network Appliances and Applications", v:[
+        {t:"Networking Devices", d:"14:31", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/networking-devices-n10-009/"},
+        {t:"Networking Functions", d:"13:25", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/networking-functions-n10-009/"}
+      ]},
+      {t:"1.3 – The Cloud", v:[
+        {t:"Designing the Cloud", d:"9:49", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/designing-the-cloud-n10-009/"},
+        {t:"Cloud Models", d:"5:23", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/cloud-models-n10-009/"}
+      ]},
+      {t:"1.4 – Ports and Protocols", v:[
+        {t:"Introduction to IP", d:"14:10", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/introduction-to-ip-n10-009/"},
+        {t:"Common Ports", d:"20:22", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/common-ports-n10-009/"},
+        {t:"Other Useful Protocols", d:"8:26", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/other-useful-protocols-n10-009/"},
+        {t:"Network Communication", d:"3:55", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-communication-n10-009/"}
+      ]},
+      {t:"1.5 – Transmission Media", v:[
+        {t:"Wireless Networking", d:"6:36", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/wireless-networking-n10-009/"},
+        {t:"Ethernet Standards", d:"4:04", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/ethernet-standards-n10-009/"},
+        {t:"Optical Fiber", d:"3:55", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/optical-fiber-n10-009/"},
+        {t:"Copper Cabling", d:"7:21", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/copper-cabling-n10-009/"},
+        {t:"Network Transceivers", d:"4:51", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-transceivers-n10-009/"},
+        {t:"Fiber Connectors", d:"3:56", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/fiber-connectors-n10-009/"},
+        {t:"Copper Connectors", d:"3:31", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/copper-connectors-n10-009/"}
+      ]},
+      {t:"1.6 – Network Topologies", v:[
+        {t:"Network Topologies", d:"4:42", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-topologies-n10-009/"},
+        {t:"Network Architectures", d:"4:53", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-architectures-n10-009/"}
+      ]},
+      {t:"1.7 – IPv4 Addressing", v:[
+        {t:"Binary Math", d:"9:15", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/binary-math-n10-009/"},
+        {t:"IPv4 Addressing", d:"11:06", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/ipv4-addressing-n10-009/"},
+        {t:"Classful Subnetting", d:"10:58", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/classful-subnetting-n10-009/"},
+        {t:"IPv4 Subnet Masks", d:"9:00", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/ipv4-subnet-masks-n10-009/"},
+        {t:"Calculating IPv4 Subnets and Hosts", d:"9:46", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/calculating-ipv4-subnets-and-hosts-n10-009/"},
+        {t:"Magic Number Subnetting", d:"21:09", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/magic-number-subnetting-n10-009/"},
+        {t:"Seven Second Subnetting", d:"17:03", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/seven-second-subnetting-n10-009/"}
+      ]},
+      {t:"1.8 – Network Environments", v:[
+        {t:"Software Defined Networking", d:"6:56", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/software-defined-networking-n10-009/"},
+        {t:"Virtual Extensible LAN", d:"5:17", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/virtual-extensible-lan-n10-009/"},
+        {t:"Zero Trust", d:"6:41", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/zero-trust-n10-009/"},
+        {t:"Infrastructure as Code", d:"8:20", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/infrastructure-as-code-n10-009/"},
+        {t:"IPv6 Addressing", d:"13:50", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/ipv6-addressing-n10-009/"}
+      ]}
+    ]},
+    {id:2, title:"Network Implementation", subs:[
+      {t:"2.1 – Routing Technologies", v:[
+        {t:"Static Routing", d:"7:21", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/static-routing-n10-009/"},
+        {t:"Dynamic Routing", d:"9:12", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/dynamic-routing-n10-009/"},
+        {t:"Routing Technologies", d:"16:10", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/routing-technologies-n10-009/"},
+        {t:"Network Address Translation", d:"7:02", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-address-translation-n10-009/"}
+      ]},
+      {t:"2.2 – Switching Technologies", v:[
+        {t:"VLANs and Trunking", d:"12:29", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/vlans-and-trunking-n10-009/"},
+        {t:"Interface Configurations", d:"6:40", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/interface-configurations-n10-009/"},
+        {t:"Spanning Tree Protocol", d:"6:06", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/spanning-tree-protocol-n10-009/"}
+      ]},
+      {t:"2.3 – Wireless Devices", v:[
+        {t:"Wireless Technologies", d:"8:34", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/wireless-technologies-n10-009/"},
+        {t:"Wireless Networking", d:"11:54", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/wireless-networking-n10-009-2/"},
+        {t:"Network Types", d:"4:41", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-types-n10-009/"},
+        {t:"Wireless Encryption", d:"3:23", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/wireless-encryption-n10-009/"}
+      ]},
+      {t:"2.4 – Physical Installations", v:[
+        {t:"Installing Networks", d:"11:40", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/installing-networks-n10-009/"},
+        {t:"Power", d:"7:19", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/power-n10-009/"},
+        {t:"Environmental Factors", d:"3:29", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/environmental-factors-n10-009/"}
+      ]}
+    ]},
+    {id:3, title:"Network Operations", subs:[
+      {t:"3.1 – Processes and Procedures", v:[
+        {t:"Network Documentation", d:"10:42", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-documentation-n10-009/"},
+        {t:"Life Cycle Management", d:"8:17", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/life-cycle-management-n10-009/"},
+        {t:"Configuration Management", d:"5:19", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/configuration-management-n10-009/"}
+      ]},
+      {t:"3.2 – Network Monitoring", v:[
+        {t:"SNMP", d:"8:58", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/snmp-n10-009/"},
+        {t:"Logs and Monitoring", d:"13:06", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/logs-and-monitoring-n10-009/"},
+        {t:"Network Solutions", d:"6:57", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-solutions-n10-009/"}
+      ]},
+      {t:"3.3 – Disaster Recovery", v:[
+        {t:"Disaster Recovery", d:"12:09", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/disaster-recovery-n10-009/"},
+        {t:"Network Redundancy", d:"4:06", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-redundancy-n10-009/"}
+      ]},
+      {t:"3.4 – IP Services", v:[
+        {t:"DHCP", d:"8:51", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/dhcp-n10-009/"},
+        {t:"Configuring DHCP", d:"10:18", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/configuring-dhcp-n10-009/"},
+        {t:"IPv6 and SLAAC", d:"4:53", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/ipv6-and-slaac-n10-009/"},
+        {t:"An Overview of DNS", d:"16:54", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/an-overview-of-dns-n10-009/"},
+        {t:"DNS Records", d:"9:04", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/dns-records-n10-009/"},
+        {t:"Time Protocols", d:"5:02", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/time-protocols-n10-009/"}
+      ]},
+      {t:"3.5 – Network Access", v:[
+        {t:"VPNs", d:"6:54", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/vpns-n10-009/"},
+        {t:"Remote Access", d:"7:52", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/remote-access-n10-009/"}
+      ]}
+    ]},
+    {id:4, title:"Network Security", subs:[
+      {t:"4.1 – Network Security Concepts", v:[
+        {t:"Security Concepts", d:"13:06", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/security-concepts-n10-009/"},
+        {t:"Authentication", d:"12:46", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/authentication-n10-009/"},
+        {t:"Security Technologies", d:"7:15", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/security-technologies-n10-009/"},
+        {t:"Regulatory Compliance", d:"4:00", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/regulatory-compliance-n10-009/"},
+        {t:"Segmentation Enforcement", d:"6:09", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/segmentation-enforcement-n10-009/"}
+      ]},
+      {t:"4.2 – Attack Types", v:[
+        {t:"Denial of Service", d:"6:58", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/denial-of-service-n10-009/"},
+        {t:"VLAN Hopping", d:"6:35", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/vlan-hopping-n10-009/"},
+        {t:"MAC Flooding", d:"8:10", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/mac-flooding-n10-009/"},
+        {t:"ARP and DNS Poisoning", d:"7:28", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/arp-and-dns-poisoning-n10-009/"},
+        {t:"Rogue Services", d:"6:08", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/rogue-services-n10-009/"},
+        {t:"Social Engineering", d:"10:56", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/social-engineering-n10-009/"},
+        {t:"Malware", d:"6:41", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/malware-n10-009/"}
+      ]},
+      {t:"4.3 – Network Security Features", v:[
+        {t:"Device Security", d:"9:03", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/device-security-n10-009/"},
+        {t:"Security Rules", d:"10:23", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/security-rules-n10-009/"}
+      ]}
+    ]},
+    {id:5, title:"Network Troubleshooting", subs:[
+      {t:"5.1 – Troubleshooting", v:[
+        {t:"Network Troubleshooting Methodology", d:"8:04", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/network-troubleshooting-methodology-n10-009/"}
+      ]},
+      {t:"5.2 – Physical Issues", v:[
+        {t:"Cable Issues", d:"14:40", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/cable-issues-n10-009/"},
+        {t:"Interface Issues", d:"9:29", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/interface-issues-n10-009/"},
+        {t:"Hardware Issues", d:"7:34", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/hardware-issues-n10-009/"}
+      ]},
+      {t:"5.3 – Troubleshooting Network Services", v:[
+        {t:"Switching Issues", d:"9:58", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/switching-issues-n10-009/"},
+        {t:"Routing and IP Issues", d:"9:37", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/routing-and-ip-issues-n10-009/"}
+      ]},
+      {t:"5.4 – Performance Issues", v:[
+        {t:"Performance Issues", d:"7:18", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/performance-issues-n10-009/"},
+        {t:"Wireless Issues", d:"9:21", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/wireless-issues-n10-009/"}
+      ]},
+      {t:"5.5 – Tools and Protocols", v:[
+        {t:"Software Tools", d:"7:29", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/software-tools-n10-009/"},
+        {t:"Command Line Tools", d:"17:59", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/command-line-tools-n10-009/"},
+        {t:"Hardware Tools", d:"8:40", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/hardware-tools-n10-009/"},
+        {t:"Basic Network Device Commands", d:"8:56", u:"https://www.professormesser.com/network-plus/n10-009/n10-009-video/basic-network-device-commands-n10-009/"}
+      ]}
+    ]}
+  ];
+
+  // give every video a stable unique id
+  let vidCounter = 0;
+  DATA.forEach(sec => sec.subs.forEach(sub => sub.v.forEach(vid => { vid.id = "v" + (vidCounter++); })));
+
+  function toSeconds(d){
+    const parts = d.split(":").map(Number);
+    return parts[0]*60 + parts[1];
+  }
+  function fmtHM(totalSeconds){
+    const h = Math.floor(totalSeconds/3600);
+    const m = Math.round((totalSeconds%3600)/60);
+    if(h > 0) return h + "h " + m + "m";
+    return m + "m";
+  }
+
+  const ALL_VIDEOS = [];
+  DATA.forEach(sec => sec.subs.forEach(sub => sub.v.forEach(vid => ALL_VIDEOS.push(vid))));
+  const TOTAL_COUNT = ALL_VIDEOS.length;
+  const TOTAL_SECONDS = ALL_VIDEOS.reduce((s,v)=>s+toSeconds(v.d),0);
+
+  let completed = {};
+  let activeSection = 0;
+
+  const navEl = document.getElementById('np-nav');
+  const mainEl = document.getElementById('np-main');
+  const topstatsEl = document.getElementById('np-topstats');
+  const linkfillEl = document.getElementById('np-linkfill');
+  const footstatEl = document.getElementById('np-footstat');
+  const resetBtn = document.getElementById('np-reset');
+
+  const checkSvg = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.2 11.7L13 4.5" stroke="#0a0d10" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function sectionStats(sec){
+    let total=0, done=0;
+    sec.subs.forEach(sub => sub.v.forEach(v => { total++; if(completed[v.id]) done++; }));
+    return {total, done};
+  }
+
+  function renderNav(){
+    navEl.innerHTML = '';
+    DATA.forEach(sec => {
+      const {total, done} = sectionStats(sec);
+      const pct = total ? Math.round(done/total*100) : 0;
+      const item = document.createElement('div');
+      item.className = 'np-nav-item' + (sec.id === activeSection ? ' active' : '');
+      item.innerHTML = `
+        <div class="np-nav-label">${sec.id}. ${sec.title}</div>
+        <div class="np-nav-bar"><div class="np-nav-bar-fill" style="width:${pct}%"></div></div>
+        <div class="np-nav-count">${done}/${total} videos</div>
+      `;
+      item.addEventListener('click', () => { activeSection = sec.id; render(); });
+      navEl.appendChild(item);
+    });
+  }
+
+  function renderMain(){
+    const sec = DATA.find(s => s.id === activeSection);
+    const {total, done} = sectionStats(sec);
+    let html = `<div class="np-section-head">${sec.id}. ${sec.title}</div>
+      <div class="np-section-sub">${done} of ${total} complete</div>`;
+    sec.subs.forEach(sub => {
+      html += `<div class="np-subsection"><div class="np-subsection-title">${sub.t}</div>`;
+      sub.v.forEach(v => {
+        const isDone = !!completed[v.id];
+        html += `
+          <div class="np-video-row ${isDone?'done':''}" data-id="${v.id}">
+            <div class="np-check ${isDone?'done':''}">${isDone?checkSvg:''}</div>
+            <div class="np-video-title">${v.t}</div>
+            <div class="np-video-dur">${v.d}</div>
+            <a class="np-video-link" href="${v.u}" target="_blank" rel="noopener" onclick="event.stopPropagation()">watch</a>
+          </div>`;
+      });
+      html += `</div>`;
+    });
+    mainEl.innerHTML = html;
+    mainEl.querySelectorAll('.np-video-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.getAttribute('data-id');
+        completed[id] = !completed[id];
+        saveProgress();
+        render();
+      });
+    });
+  }
+
+  function renderTop(){
+    const doneCount = ALL_VIDEOS.filter(v => completed[v.id]).length;
+    const doneSeconds = ALL_VIDEOS.filter(v => completed[v.id]).reduce((s,v)=>s+toSeconds(v.d),0);
+    const pct = Math.round(doneCount/TOTAL_COUNT*100);
+    topstatsEl.innerHTML = `<span><b>${doneCount}</b>/${TOTAL_COUNT} videos</span><span><b>${pct}%</b> complete</span>`;
+    linkfillEl.style.width = pct + '%';
+    const remaining = TOTAL_SECONDS - doneSeconds;
+    footstatEl.textContent = `${fmtHM(doneSeconds)} watched · ${fmtHM(remaining)} remaining of ${fmtHM(TOTAL_SECONDS)} total`;
+  }
+
+  function render(){
+    renderNav();
+    renderMain();
+    renderTop();
+  }
+
+  function saveProgress(){
+    try{
+      localStorage.setItem('n10009-progress', JSON.stringify(completed));
+    }catch(e){
+      console.error('Failed to save progress', e);
+    }
+  }
+
+  function loadProgress(){
+    try{
+      const raw = localStorage.getItem('n10009-progress');
+      if(raw){
+        completed = JSON.parse(raw);
+      }
+    }catch(e){
+      // no saved progress yet
+    }
+    render();
+  }
+
+  resetBtn.addEventListener('click', () => {
+    if(confirm('Reset all progress on this tracker?')){
+      completed = {};
+      saveProgress();
+      render();
+    }
+  });
+
+  loadProgress();
+})();
+</script>
